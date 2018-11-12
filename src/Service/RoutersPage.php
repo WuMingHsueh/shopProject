@@ -11,8 +11,8 @@ class RoutersPage
     private $kleinRequest;
 
     private $routersPage = [
-        // ["method" => "get",'path' => "", "controller" => "", "responseMethod" => "", "view" => "","canActivate" => "" ],
-        ["method" => "get", 'path' => "", "controller" => "", "responseMethod" => "", "view" => "","canActivate" => "" ],
+        // ["method" => "get", 'path' => "", "controller" => "", "responseMethod" => "", "viewLayout" => "", "viewRender" => ""],
+        ["method" => "get", 'path' => "/user/auth/sign-up", "controller" => "ShopProject\Controllers\User\UserAuthController", "responseMethod" => "signUpPage", "viewLayout" => "src/Views/layouts/default.php", "viewRender" => "src/Views/auth/signUp.php"],
         
     ];
 
@@ -23,7 +23,10 @@ class RoutersPage
         $this->klein = new Klein;
         foreach ($this->routersPage as $routerPage) {
             $this->klein->respond($routerPage['method'], $routerPage['path'], function ($request, $resopnse, $service) use ($routerPage) {
-                $service = $controller->{$router['responseMethod']}($request, $service);
+                $controller = new $routerPage['controller'];
+                $service = $controller->{$routerPage['responseMethod']}($request, $service);
+                $service->layout($routerPage['viewLayout']);
+                $service->render($routerPage['viewRender']);
             });
         }
         $this->klein->dispatch($this->kleinRequest);
