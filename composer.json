@@ -1,16 +1,18 @@
 {
-    "name": "ri3567/base-temple-php",
-    "description": "my person use php project base template for begin new php project",
+    "name": "ri3567/shop-project",
+    "description": "from shop laravel book improve to myself php Project Structure",
     "authors": [
         {
             "name": "Wu Ming-Hsueh",
             "email": "ri3567@gmail.com"
         }
     ],
-	"require": {},
+	"require": {
+        "klein/klein": "^2.1"
+    },
 	"autoload": {
 		"psr-4": {
-			"BaseTemplatePHP\\" : "src/"
+			"ShopProject\\" : "src/"
 		}
 	}
 }
