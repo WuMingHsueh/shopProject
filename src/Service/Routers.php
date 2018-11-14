@@ -13,6 +13,12 @@ class Routers
     private $routers = [
         // ["method" => "post", 'path' => "", "controller" => "", "responseMethod" => "", "canActivate" => "" ],
         
+	];
+	
+	private $routersPage = [
+        // ["method" => "get", 'path' => "", "controller" => "", "responseMethod" => "", "viewLayout" => "", "viewRender" => ""],
+        ["method" => "get",  'path' => "/user/auth/sign-up", "controller" => "ShopProject\Controllers\User\UserAuthController", "responseMethod" => "signUpPage"],
+        ["method" => "post", 'path' => "/user/auth/sign-up", "controller" => "ShopProject\Controllers\User\UserAuthController", "responseMethod" => "signUpProcess"],
     ];
 
     public function __construct()
@@ -20,17 +26,8 @@ class Routers
         $this->initSubDirectory(); // 若專案目錄是 "sub Directory" 則加入此函數設定$_SERVER['REQUEST_URI']
 
         $this->klein = new Klein;
-        foreach ($this->routers as $router) {
-            $this->klein->respond($router['method'], $router['path'], function ($request, $resopnse) use ($router) {
-                $controller = (isset($router["injectionService"]))? new $router['controller'](new $router["injectionService"]) : new $router['controller'];
-                try {
-                    return $controller->{$router['responseMethod']}($request);
-                } catch (\Exception $e) {
-                    $resopnse->code($e->getCode());
-                    return $e->getMessage();
-                }
-            });
-        }
+		$this->respondAPI();
+		$this->respondPage();
         $this->klein->dispatch($this->kleinRequest);
         
         // initSubDirectory function (2) content
@@ -48,5 +45,30 @@ class Routers
         // (2)
         // This might also work,it doesn't need a custom request object
         // $_SERVER['REQUEST_URI'] = substr($_SERVER['REQUEST_URI'], strlen(IEnvironment::ROUTER_START));
-    }
+	}
+	
+	public function respondAPI()
+	{
+		foreach ($this->routers as $router) {
+            $this->klein->respond($router['method'], $router['path'], function ($request, $resopnse) use ($router) {
+                $controller = (isset($router["injectionService"]))? new $router['controller'](new $router["injectionService"]) : new $router['controller'];
+                try {
+                    return $controller->{$router['responseMethod']}($request);
+                } catch (\Exception $e) {
+                    $resopnse->code($e->getCode());
+                    return $e->getMessage();
+                }
+            });
+        }
+	}
+
+	public function respondPage(Type $var = null)
+	{
+		foreach ($this->routersPage as $routerPage) {
+            $this->klein->respond($routerPage['method'], $routerPage['path'], function ($request, $resopnse, $service) use ($routerPage) {
+                $controller = new $routerPage['controller'];
+                $service = $controller->{$routerPage['responseMethod']}($request, $service);
+            });
+        }
+	}
 }

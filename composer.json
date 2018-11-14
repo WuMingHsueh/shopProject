@@ -10,7 +10,8 @@
 	"require": {
         "klein/klein": "^2.1",
         "illuminate/database": "^5.7",
-        "defuse/php-encryption": "^2.2"
+        "defuse/php-encryption": "^2.2",
+        "Respect/Validation": "^1.1"
     },
 	"autoload": {
 		"psr-4": {
