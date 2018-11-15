@@ -11,7 +11,9 @@
         "klein/klein": "^2.1",
         "illuminate/database": "^5.7",
         "defuse/php-encryption": "^2.2",
-        "Respect/Validation": "^1.1"
+        "Respect/Validation": "^1.1",
+        "paragonie/halite": "^4.4",
+        "swiftmailer/swiftmailer": "^6.1"
     },
 	"autoload": {
 		"psr-4": {

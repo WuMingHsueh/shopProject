@@ -2,7 +2,6 @@
 namespace ShopProject\Service;
 
 use ShopProject\IEnvironment;
-
 use Illuminate\Database\Capsule\Manager as DB;
 
 class DbHelper
