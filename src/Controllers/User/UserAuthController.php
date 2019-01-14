@@ -7,6 +7,7 @@ use ParagonIE\Halite\KeyFactory;
 use ParagonIE\Halite\Symmetric\Crypto;
 use ParagonIE\Halite\HiddenString;
 use ShopProject\Models\DataCollection\User;
+use ShopProject\Service\MailHelper;
 
 class UserAuthController
 {
@@ -28,13 +29,14 @@ class UserAuthController
             $service->layout("src/Views/layouts/default.php");
             $service->render(
                 "src/Views/auth/signUp.php",
-                             ['errors'                => $errorMsg,
-                              'nickname'              => $request->nickname,
-                              'email'                 => $request->email,
-                              'password'              => $request->password,
-                              'password_confirmation' => $request->password_confirmation,
-                              'type'                  => $request->type
-                            ]
+                [
+                    'errors'                => $errorMsg,
+                    'nickname'              => $request->nickname,
+                    'email'                 => $request->email,
+                    'password'              => $request->password,
+                    'password_confirmation' => $request->password_confirmation,
+                    'type'                  => $request->type
+                ]
             );
             return $service;
             exit;
@@ -46,8 +48,19 @@ class UserAuthController
         $input['password'] = Crypto::encrypt(new HiddenString($input['password']), $key);
         User::create($input);
         
+        $mailer = new MailHelper;
+        $content = $mailer->customizedContent(
+                "src/Views/email/signUpEmailNotification.php",
+                [
+                    "nickname" => $request->nickname,
+                ]
+            );
+        $mailer->send("b9703124@mail.ntust.edu.tw", $request->email, "註冊確認", $content);
         
-        
+        $service->routerRoot = IEnvironment::ROUTER_START;
+        $service->title = "登入";
+        $service->layout("src/Views/layouts/default.php");
+        $service->render("src/Views/auth/signIn.php", []);
         return $service;
     }
 

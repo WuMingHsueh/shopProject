@@ -21,14 +21,17 @@ class MailHelper
         $message = (new \Swift_Message($subject))
                     ->setFrom($fromUser)
                     ->setTo([$ToUser => $ToUser])
-                    ->setBody($content);
+                    ->setBody($content, 'text/html');
         $this->mailer->send($message);
     }
 
     public function customizedContent(string $path, array $params)
     {
-        extract($array);
-        return include($path);
+        extract($params);
+        // return include($path);
+        \ob_start();
+        include $path;
+        return \ob_get_clean();
     }
     
 
