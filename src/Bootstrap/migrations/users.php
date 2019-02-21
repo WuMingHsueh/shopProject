@@ -8,7 +8,7 @@ DB::schema()->dropIfExists('users');
 DB::schema()->create('users', function ($table) {
     $table->increments('id');
     $table->string('email', 150)->unique();
-    $table->string('password', 180);
+    $table->string('password', 296);
     $table->string('nickname', 50);
 
     // 帳號類型 (type) 用於識別會員身分
