@@ -77,20 +77,41 @@ class UserAuthController
 			exit;
 		}
 
-		$keyConfig = dirname($_SERVER['DOCUMENT_ROOT']) . "/phpWarehouse/" . IEnvironment::PROJECT_NAME . "/config/key.ini";
-		$key = KeyFactory::loadEncryptionKey($keyConfig);
-		$input = $request->params();
-		$input['password'] = Password::hash(new HiddenString($input['password']), $key);
-		User::create($input);
+		try {
+			$keyConfig = dirname($_SERVER['DOCUMENT_ROOT']) . "/phpWarehouse/" . IEnvironment::PROJECT_NAME . "/config/key.ini";
+			$key = KeyFactory::loadEncryptionKey($keyConfig);
+			$input = $request->params();
+			$input['password'] = Password::hash(new HiddenString($input['password']), $key);
+			User::create($input);
 
-		$mailer = new MailHelper;
-		$content = $mailer->customizedContent(
-			"src/Views/email/signUpEmailNotification.php",
-			[
-				"nickname" => $request->nickname,
-			]
-		);
-		$mailer->send("rick1870@ares.com.tw", $request->email, "註冊確認", $content);
+			$mailer = new MailHelper;
+			$content = $mailer->customizedContent(
+				"src/Views/email/signUpEmailNotification.php",
+				[
+					"nickname" => $request->nickname,
+				]
+			);
+			$mailer->send("rick1870@ares.com.tw", $request->email, "註冊確認", $content);
+		} catch (\Exception $e) {
+			$error[] = $e->getCode();
+			$error[] = $e->getMessage();
+			$service->routerRoot = IEnvironment::ROUTER_START;
+			$service->title = "註冊";
+			$service->layout("src/Views/layouts/default.php");
+			$service->render(
+				"src/Views/auth/signUp.php",
+				[
+					'errors'                => $error,
+					'nickname'              => $request->nickname,
+					'email'                 => $request->email,
+					'password'              => $request->password,
+					'password_confirmation' => $request->password_confirmation,
+					'type'                  => $request->type
+				]
+			);
+			return $service;
+			exit;
+		}
 
 		$service->routerRoot = IEnvironment::ROUTER_START;
 		$service->title = "登入";
