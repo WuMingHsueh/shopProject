@@ -1,6 +1,7 @@
 <?php
 namespace ShopProject\Controllers\User;
 
+use Pimple\Container;
 use ShopProject\IEnvironment;
 use Respect\Validation\Validator;
 use ParagonIE\Halite\KeyFactory;
@@ -11,6 +12,13 @@ use ShopProject\Service\MailHelper;
 
 class UserAuthController
 {
+	private $session;
+
+	public function __construct(Container $container)
+	{
+		$this->session = $container['session'];
+	}
+
 	public function signInPage($request, $service)
 	{
 		$service->routerRoot = IEnvironment::ROUTER_START;
