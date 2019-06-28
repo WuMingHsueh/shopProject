@@ -24,6 +24,13 @@ class Routers
 		["method" => "get",  'path' => "/user/auth/sign-in",  "controller" => "ShopProject\Controllers\User\UserAuthController", "responseMethod" => "signInPage"],
 		["method" => "post", 'path' => "/user/auth/sign-in",  "controller" => "ShopProject\Controllers\User\UserAuthController", "responseMethod" => "signInProcess"],
 		["method" => "get",  'path' => "/user/auth/sign-out", "controller" => "ShopProject\Controllers\User\UserAuthController", "responseMethod" => "signOutProcess"],
+		["method" => "get",  'path' => "/merchandise",        "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseListPage"],
+		["method" => "get",  'path' => "/merchandise/create", "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseCreateProcess"],
+		["method" => "get",  'path' => "/merchandise/manage", "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseManageListPage"],
+		["method" => "get",  'path' => "/merchandise/[:merchandiseId]", "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseItemPage"],
+		["method" => "get",  'path' => "/merchandise/[:merchandiseId]/edit", "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseItemEditPage"],
+		["method" => "put",  'path' => "/merchandise/[:merchandiseId]", "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseItemUpdateProcess"],
+		["method" => "post", 'path' => "/merchandise/[:merchandiseId]/buy", "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseItemBuyProcess"],
 	];
 
 	public function __construct(Container $container = null)
@@ -71,9 +78,9 @@ class Routers
 	public function respondPage()
 	{
 		foreach ($this->routersPage as $routerPage) {
-			$this->klein->respond($routerPage['method'], $routerPage['path'], function ($request, $resopnse, $service) use ($routerPage) {
+			$this->klein->respond($routerPage['method'], $routerPage['path'], function ($request, $response, $service) use ($routerPage) {
 				$controller = new $routerPage['controller']($this->container);
-				$service = $controller->{$routerPage['responseMethod']}($request, $service);
+				$service = $controller->{$routerPage['responseMethod']}($request, $service, $response);
 			});
 		}
 	}

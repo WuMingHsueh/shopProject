@@ -2,8 +2,7 @@
 	<?= $this->escape($this->title) ?>
 </h1>
 
-<?= $this->partial('src/Views/components/socialButtons.php')?>
-<?= $this->partial('src/Views/components/validationErrorMessage.php')?>
+<?= $this->partial('src/Views/components/validationErrorMessage.php') ?>
 
 <form action="<?= $this->routerRoot ?>/user/auth/sign-up" method="post">
 	<label>
@@ -21,8 +20,8 @@
 	<label>
 		帳號類型:
 		<select name="type">
-			<option value="G" <?= (@$this->type == 'G')? 'selected' : ''; ?> >一般會員</option>
-			<option value="A" <?= (@$this->type == 'A')? 'selected' : ''; ?> >管理者</option>
+			<option value="G" <?= (@$this->type == 'G') ? 'selected' : ''; ?>>一般會員</option>
+			<option value="A" <?= (@$this->type == 'A') ? 'selected' : ''; ?>>管理者</option>
 		</select>
 	</label>
 	<button>註冊</button>

@@ -19,22 +19,24 @@ class UserAuthController
 		$this->session = $container['session'];
 	}
 
-	public function signInPage($request, $service)
+	public function signInPage($request, $service, $response)
 	{
 		$service->routerRoot = IEnvironment::ROUTER_START;
+		$service->session = $this->session->read(\session_id());
 		$service->title = "登入";
 		$service->layout("src/Views/layouts/default.php");
 		$service->render("src/Views/auth/signIn.php");
 		return $service;
 	}
 
-	public function signInProcess($request, $service)
+	public function signInProcess($request, $service, $response)
 	{
 		$errorMsgPageForm = $this->validateSignIn($request);
 		$errorMsgAccountPassword = $this->validateSignInPassword($request->email, $request->password);
 		$errorMsg = \array_merge($errorMsgPageForm, $errorMsgAccountPassword);
 		if (count($errorMsg)) {
 			$service->routerRoot = IEnvironment::ROUTER_START;
+			$service->session = $this->session->read(\session_id());
 			$service->title = "登入";
 			$service->layout("src/Views/layouts/default.php");
 			$service->render(
@@ -47,27 +49,46 @@ class UserAuthController
 			return $service;
 			exit;
 		}
+		// $this->session->setOptions(['ttl' => 40]) //設定session 存活40秒
+		$this->session->write(\session_id(), [
+			'email' => $request->email,
+			'token' => $this->generatorToken()
+		]);
+		$service->routerRoot = IEnvironment::ROUTER_START;
+		$service->session = $this->session->read(\session_id());
+		$service->title = "已登入";
+		$service->layout("src/Views/layouts/default.php");
+		$service->render("src/Views/auth/needLogin.php");
+		return $service;
 	}
 
-	public function signOutProcess(Type $var = null)
+	public function signOutProcess($request, $service, $response)
 	{
-		# code...
+		$this->session->destroy(\session_id());
+		$service->routerRoot = IEnvironment::ROUTER_START;
+		$service->session = $this->session->read(\session_id());
+		$service->title = "登入";
+		$service->layout("src/Views/layouts/default.php");
+		$service->render("src/Views/auth/signIn.php");
+		return $service;
 	}
 
-	public function signUpPage($request, $service)
+	public function signUpPage($request, $service, $response)
 	{
 		$service->routerRoot = IEnvironment::ROUTER_START;
+		$service->session = $this->session->read(\session_id());
 		$service->title = "註冊";
 		$service->layout("src/Views/layouts/default.php");
 		$service->render("src/Views/auth/signUp.php");
 		return $service;
 	}
 
-	public function signUpProcess($request, $service)
+	public function signUpProcess($request, $service, $response)
 	{
 		$errorMsg = $this->validateSignUp($request);
 		if (count($errorMsg)) {
 			$service->routerRoot = IEnvironment::ROUTER_START;
+			$service->session = $this->session->read(\session_id());
 			$service->title = "註冊";
 			$service->layout("src/Views/layouts/default.php");
 			$service->render(
@@ -104,6 +125,7 @@ class UserAuthController
 			$error[] = $e->getCode();
 			$error[] = $e->getMessage();
 			$service->routerRoot = IEnvironment::ROUTER_START;
+			$service->session = $this->session->read(\session_id());
 			$service->title = "註冊";
 			$service->layout("src/Views/layouts/default.php");
 			$service->render(
@@ -122,10 +144,18 @@ class UserAuthController
 		}
 
 		$service->routerRoot = IEnvironment::ROUTER_START;
+		$service->session = $this->session->read(\session_id());
 		$service->title = "登入";
 		$service->layout("src/Views/layouts/default.php");
 		$service->render("src/Views/auth/signIn.php", []);
 		return $service;
+	}
+
+	private function generatorToken(): string
+	{
+		$dataSet = array_merge(range('a', 'z'), range('a', 'z'), range('A', 'Z'), range('A', 'Z'), range(0, 9), range(0, 9), array_fill(0, 4, '_'));
+		shuffle($dataSet);
+		return implode('', array_slice($dataSet, 0, 20));
 	}
 
 	private function validateSignIn($request)
