@@ -1,14 +1,15 @@
 <?php
 require __DIR__ . "/vendor/autoload.php";
 
-// require __DIR__ . "/src/Bootstrap/database.php";
+require __DIR__ . "/src/Bootstrap/database.php";
 
-// use ShopProject\Models\DataCollection\User;
-// use ShopProject\IEnvironment;
+use ShopProject\Models\DataCollection\User;
+use ShopProject\IEnvironment;
 // use ParagonIE\Halite\KeyFactory;
 // use ParagonIE\Halite\HiddenString;
 // use ParagonIE\Halite\Password;
 
+User::
 // $keyConfig = dirname($_SERVER['DOCUMENT_ROOT']) . "/phpWarehouse/" . IEnvironment::PROJECT_NAME . "/config/key.ini";
 // $key = KeyFactory::loadEncryptionKey($keyConfig);
 
@@ -27,8 +28,9 @@ require __DIR__ . "/vendor/autoload.php";
 // print empty($_SERVER['DOCUMENT_ROOT']) ? (IEnvironment::DOCUMENT_ROOT) : $_SERVER['DOCUMENT_ROOT'];
 // print PHP_EOL;
 // print dirname($_SERVER['DOCUMENT_ROOT'] ?? IEnvironment::DOCUMENT_ROOT) . "/phpWarehouse/" . IEnvironment::PROJECT_NAME . "/config/key.ini";
-
-$options = ['ttl' => (int)ini_get('session.gc_maxlifetime')];
-var_dump($options);
-$options = array_merge($options, ['ttl' => 40]);
-var_dump($options);
+?>
+<form action="<?= IEnvironment::ROUTER_START ?>/merchandise/test" method="post">
+	<input type="hidden" name="_method" value="put" />
+	<input type="text" name="number">
+	<button type="submit">ok</button>
+</form>

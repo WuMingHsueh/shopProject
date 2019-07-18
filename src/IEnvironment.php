@@ -8,4 +8,9 @@ interface IEnvironment
 	const NAMESPACE_ROOT = "ShopProject";
 	const DOCUMENT_ROOT = "/usr/local/var/www";
 	// const CONNECTION_NAME = ["default", "sqlserver_dverental"];
+
+	const SESSION_PATH_NAME = [
+		'LOGGIN' => ['PATH' => 'login', 'NAME' => 'data'],
+		'CSRF'   => ['PATH' => 'form',  'NAME' => 'token']
+	];
 }

@@ -13,5 +13,5 @@
 		Password:
 		<input type="password" name="password" placeholder="Password">
 	</label>
-	<button>登入</button>
+	<button class="btn btn-info">登入</button>
 </form>
