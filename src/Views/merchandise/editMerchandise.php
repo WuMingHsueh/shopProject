@@ -44,7 +44,7 @@
 		<label>
 			商品照片：
 			<input type="file" name="photo" placeholder="商品照片">
-			<img src="<?= $this->escape($this->merchandise->photo) ?? 'src/Views/asset/images/default-merchandise.jpg' ?>" alt="">
+			<img src="<?= $this->escape($this->merchandise->photo) ?>" alt="">
 		</label>
 	</div>
 	<div>

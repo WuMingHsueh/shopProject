@@ -93,6 +93,7 @@ class Routers
 	{
 		foreach ($this->routersPage as $routerPage) {
 			$this->klein->respond($routerPage['method'], $routerPage['path'], function ($request, $response, $service) use ($routerPage) {
+				unset($this->container['page']);
 				$this->container['page'] = function ($c) use ($service) {
 					return  $service;
 				};

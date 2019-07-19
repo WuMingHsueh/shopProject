@@ -16,7 +16,9 @@
         "swiftmailer/swiftmailer": "^6.1",
         "pimple/pimple": "^3.2",
         "tedivm/stash": "^0.15.2",
-        "league/fractal": "^0.18.0"
+        "league/fractal": "^0.18.0",
+        "intervention/image": "^2.5",
+        "illuminate/pagination": "~5.7"
     },
 	"autoload": {
 		"psr-4": {
