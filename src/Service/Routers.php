@@ -21,19 +21,20 @@ class Routers
 
 	private $routersPage = [
 		// ["method" => "get", 'path' => "", "controller" => "", "responseMethod" => "", "viewLayout" => "", "viewRender" => "", "middlewareLayers" => [] ],
-		["method" => "get",  'path' => "/user/auth/sign-up",  "controller" => "ShopProject\Controllers\User\UserAuthController", "responseMethod" => "signUpPage", "middlewareLayers" => []],
-		["method" => "get",  'path' => "/user/auth/status",  "controller" => "ShopProject\Controllers\User\UserAuthController", "responseMethod" => "signStatus", "middlewareLayers" => []],
-		["method" => "post", 'path' => "/user/auth/sign-up",  "controller" => "ShopProject\Controllers\User\UserAuthController", "responseMethod" => "signUpProcess", "middlewareLayers" => []],
-		["method" => "get",  'path' => "/user/auth/sign-in",  "controller" => "ShopProject\Controllers\User\UserAuthController", "responseMethod" => "signInPage", "middlewareLayers" => []],
-		["method" => "post", 'path' => "/user/auth/sign-in",  "controller" => "ShopProject\Controllers\User\UserAuthController", "responseMethod" => "signInProcess", "middlewareLayers" => []],
-		["method" => "get",  'path' => "/user/auth/sign-out", "controller" => "ShopProject\Controllers\User\UserAuthController", "responseMethod" => "signOutProcess", "middlewareLayers" => []],
-		["method" => "get",  'path' => "/merchandise",        "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseListPage", "middlewareLayers" => []],
-		["method" => "get",  'path' => "/merchandise/create", "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseCreateProcess", "middlewareLayers" => ["ShopProject\Middleware\AuthUserAdmin"]],
-		["method" => "get",  'path' => "/merchandise/manage", "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseManageListPage", "middlewareLayers" => ["ShopProject\Middleware\AuthUserAdmin"]],
-		["method" => "get",  'path' => "/merchandise/[:merchandiseId]", "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseItemPage", "middlewareLayers" => []],
-		["method" => "get",  'path' => "/merchandise/[:merchandiseId]/edit", "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseItemEditPage", "middlewareLayers" => ["ShopProject\Middleware\AuthUserAdmin"]],
-		["method" => "put",  'path' => "/merchandise/[:merchandiseId]", "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseItemUpdateProcess", "middlewareLayers" => ["ShopProject\Middleware\AuthUserAdmin"]],
-		["method" => "post", 'path' => "/merchandise/[:merchandiseId]/buy", "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseItemBuyProcess", "middlewareLayers" => ["ShopProject\Middleware\AuthUser"]],
+		["method" => "get",  'path' => "/user/auth/sign-up",                 "controller" => "ShopProject\Controllers\User\UserAuthController",           "responseMethod" => "signUpPage",                   "middlewareLayers" => []],
+		["method" => "get",  'path' => "/user/auth/status",                  "controller" => "ShopProject\Controllers\User\UserAuthController",           "responseMethod" => "signStatus",                   "middlewareLayers" => []],
+		["method" => "post", 'path' => "/user/auth/sign-up",                 "controller" => "ShopProject\Controllers\User\UserAuthController",           "responseMethod" => "signUpProcess",                "middlewareLayers" => []],
+		["method" => "get",  'path' => "/user/auth/sign-in",                 "controller" => "ShopProject\Controllers\User\UserAuthController",           "responseMethod" => "signInPage",                   "middlewareLayers" => []],
+		["method" => "post", 'path' => "/user/auth/sign-in",                 "controller" => "ShopProject\Controllers\User\UserAuthController",           "responseMethod" => "signInProcess",                "middlewareLayers" => []],
+		["method" => "get",  'path' => "/user/auth/sign-out",                "controller" => "ShopProject\Controllers\User\UserAuthController",           "responseMethod" => "signOutProcess",               "middlewareLayers" => []],
+		["method" => "get",  'path' => "/merchandise",                       "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseListPage",          "middlewareLayers" => []],
+		["method" => "get",  'path' => "/merchandise/create",                "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseCreateProcess",     "middlewareLayers" => ["ShopProject\Middleware\AuthUserAdmin"]],
+		["method" => "get",  'path' => "/merchandise/manage",                "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseManageListPage",    "middlewareLayers" => ["ShopProject\Middleware\AuthUserAdmin"]],
+		["method" => "get",  'path' => "/merchandise/[:merchandiseId]",      "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseItemPage",          "middlewareLayers" => []],
+		["method" => "get",  'path' => "/merchandise/[:merchandiseId]/edit", "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseItemEditPage",      "middlewareLayers" => ["ShopProject\Middleware\AuthUserAdmin"]],
+		["method" => "put",  'path' => "/merchandise/[:merchandiseId]",      "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseItemUpdateProcess", "middlewareLayers" => ["ShopProject\Middleware\AuthUserAdmin"]],
+		["method" => "post", 'path' => "/merchandise/[:merchandiseId]/buy",  "controller" => "ShopProject\Controllers\Merchandise\MerchandiseController", "responseMethod" => "merchandiseItemBuyProcess",    "middlewareLayers" => ["ShopProject\Middleware\AuthUser"]],
+		["method" => "get",  'path' => "/transaction",                       "controller" => "ShopProject\Controllers\Transaction\TransactionController", "responseMethod" => "transactionListPage",          "middlewareLayers" => ["ShopProject\Middleware\AuthUser"]],
 	];
 
 	public function __construct(Container $container = null)
@@ -93,7 +94,6 @@ class Routers
 	{
 		foreach ($this->routersPage as $routerPage) {
 			$this->klein->respond($routerPage['method'], $routerPage['path'], function ($request, $response, $service) use ($routerPage) {
-				unset($this->container['page']);
 				$this->container['page'] = function ($c) use ($service) {
 					return  $service;
 				};
@@ -111,6 +111,7 @@ class Routers
 					);
 				}
 				$service = $this->container['page'];
+				unset($this->container['page']);
 			});
 		}
 	}

@@ -5,7 +5,7 @@ namespace ShopProject\Middleware;
 use ShopProject\Service\Middleware\IMiddlewareLayer;
 use ShopProject\IEnvironment;
 use Pimple\Container;
-use Closuer;
+use Closure;
 
 class AuthUser implements IMiddlewareLayer
 {
@@ -18,7 +18,7 @@ class AuthUser implements IMiddlewareLayer
 		$this->session = $container['session'];
 	}
 
-	public function handle($request, Closuer $next, $response)
+	public function handle($request, Closure $next, $response)
 	{
 		$this->session->open(IEnvironment::SESSION_PATH_NAME['LOGGIN']['PATH'], IEnvironment::SESSION_PATH_NAME['LOGGIN']['NAME']);
 		$userSession = $this->session->read(\session_id());

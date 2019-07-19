@@ -2,11 +2,15 @@
 
 namespace ShopProject\Controllers\Merchandise;
 
+use Exception;
 use Pimple\Container;
 use Respect\Validation\Validator;
 use Intervention\Image\ImageManagerStatic as Image;
+use Illuminate\Database\Capsule\Manager as DB;
 use ShopProject\IEnvironment;
 use ShopProject\Models\DataCollection\Merchandise;
+use ShopProject\Models\DataCollection\User;
+use ShopProject\Models\DataCollection\Transaction;
 
 class MerchandiseController
 {
@@ -37,11 +41,53 @@ class MerchandiseController
 			->send();
 	}
 
+	public function merchandiseItemBuyProcess($request, $response)
+	{
+		$errorMsg = $this->validatorItemBuyProcess($request);
+		if (count($errorMsg)) {
+			$request->__set('errors', $errorMsg);
+			return $this->merchandiseItemPage($request, $response);
+		}
+		try {
+			$buyCount = $request->buyCount;
+			$this->session->open(IEnvironment::SESSION_PATH_NAME['LOGGIN']['PATH'], IEnvironment::SESSION_PATH_NAME['LOGGIN']['NAME']);
+			$emailUserSession = $this->session->read(\session_id())['email'];
+			$user = User::where('email', $emailUserSession)->get()[0];
+			// 交易開始
+			DB::beginTransaction();
+			$merchandise = Merchandise::findOrFail($request->merchandiseId);
+			$remainCountAfterBuy = $merchandise->remain_count - $buyCount;
+			if ($remainCountAfterBuy < 0) {
+				throw new Exception("商品數量不足 無法購買");
+			}
+			$merchandise->remain_count = $remainCountAfterBuy;
+			$merchandise->save();
+
+			$totalPrice = $buyCount * $merchandise->price;
+			Transaction::create([
+				'user_id'        => $user->id,
+				'merchandise_id' => $merchandise->id,
+				'price'          => $merchandise->price,
+				'buy_count'      => $buyCount,
+				'total_price'    => $totalPrice
+			]);
+			DB::commit();
+			// 交易結束
+			$request->__set('errors', ['購買成功']);
+			return $this->merchandiseItemPage($request, $response);
+		} catch (\Exception $e) {
+			DB::rollBack();
+			$request->__set('errors', [$e->getMessage()]);
+			return $this->merchandiseItemPage($request, $response);
+		}
+	}
+
 	public function merchandiseItemEditPage($request, $response)
 	{
 		$merchandise = Merchandise::findOrFail($request->merchandiseId);
 		$merchandise->photo = $this->imageDataUrlShow($merchandise->photo);
 		$this->page->routerRoot = IEnvironment::ROUTER_START;
+		$this->session->open(IEnvironment::SESSION_PATH_NAME['LOGGIN']['PATH'], IEnvironment::SESSION_PATH_NAME['LOGGIN']['NAME']);
 		$this->page->session = $this->session->read(\session_id());
 		$this->page->title = "修改商品";
 		$this->page->csrfField = $this->generatorCsrfToken();
@@ -50,10 +96,27 @@ class MerchandiseController
 		$this->page->render("src/Views/merchandise/editMerchandise.php", ['errors' => (array) $request->errors]);
 	}
 
+	public function merchandiseItemPage($request, $response)
+	{
+		$merchandiseId = $request->merchandiseId;
+		$merchandise = Merchandise::findOrFail($merchandiseId);
+		$merchandise->photo = $this->imageDataUrlShow($merchandise->photo);
+		$this->page->routerRoot = IEnvironment::ROUTER_START;
+		$this->page->title = "商品頁";
+		$this->session->open(IEnvironment::SESSION_PATH_NAME['LOGGIN']['PATH'], IEnvironment::SESSION_PATH_NAME['LOGGIN']['NAME']);
+		$this->page->session = $this->session->read(\session_id());
+		$this->page->layout("src/Views/layouts/default.php");
+		$this->page->render("src/Views/merchandise/showMerchandise.php", [
+			'merchandise' => $merchandise,
+			'csrfField'   => $this->generatorCsrfToken(),
+			'errors'      => $request->errors ?? []
+		]);
+	}
+
 	public function merchandiseItemUpdateProcess($request, $response)
 	{
 		$merchandise = Merchandise::findOrFail($request->merchandiseId);
-		$errorMsg = $this->validatorUpdate($request);
+		$errorMsg = $this->validatorItemUpdateProcess($request);
 		if (count($errorMsg)) {
 			$request->__set('errors', $errorMsg);
 			return $this->merchandiseItemEditPage($request, $response);
@@ -92,21 +155,46 @@ class MerchandiseController
 		}
 		$this->page->routerRoot = IEnvironment::ROUTER_START;
 		$this->page->title = "管理商品";
+		$this->session->open(IEnvironment::SESSION_PATH_NAME['LOGGIN']['PATH'], IEnvironment::SESSION_PATH_NAME['LOGGIN']['NAME']);
 		$this->page->session = $this->session->read(\session_id());
 		$this->page->layout("src/Views/layouts/default.php");
 		$this->page->render("src/Views/merchandise/manageMerchandise.php", [
 			'merchandisePaginate' => $merchandisePaginate,
 			'paginateLinks'       => range(1, $totalPage),
 			'currentPage'         => $currentPage,
-			'totalPage'           => $totalPage
+			'totalPage'           => $totalPage,
+			'paginationHref'      => IEnvironment::ROUTER_START . "/merchandise/manage?page="
 		]);
 	}
 
-	public function merchandiseItemPage($request, $response)
+	public function merchandiseListPage($request, $response)
 	{
-		# code...
+		$currentPage = $request->paramsGet()['page'] ?? 1;
+		$rowPerPage = 3;
+		$startRecord = ($currentPage - 1) * $rowPerPage;
+		$merchandisePaginate = Merchandise::OrderBy('created_at', 'desc')
+			->where('status', 'S')
+			->offset($startRecord)
+			->limit($rowPerPage)
+			->get();
+		foreach ($merchandisePaginate as &$merchandise) {
+			$merchandise->photo = $this->imageDataUrlShow($merchandise->photo);
+		}
+		$totalCount = count($merchandisePaginate);
+		$totalPage = ceil($totalCount / $rowPerPage);
+		$this->page->routerRoot = IEnvironment::ROUTER_START;
+		$this->page->title = "商品列表";
+		$this->session->open(IEnvironment::SESSION_PATH_NAME['LOGGIN']['PATH'], IEnvironment::SESSION_PATH_NAME['LOGGIN']['NAME']);
+		$this->page->session = $this->session->read(\session_id());
+		$this->page->layout("src/Views/layouts/default.php");
+		$this->page->render("src/Views/merchandise/listMerchandise.php", [
+			'merchandisePaginate' => $merchandisePaginate,
+			'paginateLinks'       => range(1, $totalPage),
+			'currentPage'         => $currentPage,
+			'totalPage'           => $totalPage,
+			'paginationHref'      => IEnvironment::ROUTER_START . "/merchandise?page=",
+		]);
 	}
-
 
 	private function generatorCsrfToken(): string
 	{
@@ -126,7 +214,22 @@ class MerchandiseController
 		return Image::make($imagePath)->encode('data-url');
 	}
 
-	private function validatorUpdate($request)
+	private function validatorItemBuyProcess($request)
+	{
+		$errorMsg = [];
+		if (!Validator::notBlank()->validate($request->buyCount) and !Validator::in(['0', '0.0', 0])->validate($request->buyCount)) {
+			$errorMsg[] = "購買數量 不能為空";
+		}
+		if (!Validator::intVal()->validate($request->buyCount)) {
+			$errorMsg[] = "購買數量 必須為整數";
+		}
+		if (!Validator::intVal()->min(1)->validate($request->buyCount)) {
+			$errorMsg[] = "購買數量 必須為大於等於1";
+		}
+		return $errorMsg;
+	}
+
+	private function validatorItemUpdateProcess($request)
 	{
 		$errorMsg = [];
 		if (!Validator::notBlank()->validate($request->status)) {
