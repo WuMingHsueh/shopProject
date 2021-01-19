@@ -9,7 +9,7 @@
     ],
 	"require": {
         "klein/klein": "^2.1",
-        "illuminate/database": "^5.7",
+        "illuminate/database": "^6.20",
         "defuse/php-encryption": "^2.2",
         "Respect/Validation": "^1.1",
         "paragonie/halite": "^4.4",
